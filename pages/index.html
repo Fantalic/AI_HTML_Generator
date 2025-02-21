@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-indigo-100">
+    <div class="container mx-auto px-4 py-8 max-w-4xl  ">
+        <h1 class="text-3xl font-bold mb-8 text-center">AI HTML Generator</h1>
+
+        <form id="searchForm" onsubmit="handleSubmit(event)">
+            <div class="mb-8">
+                <input
+                    class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-blue-500"
+                    placeholder="type your prompt here"
+                    type="text"
+                    id="searchInput"
+                >
+            </div>
+
+            <button type="submit"
+                    class="w-full bg-blue-500 text-white py-3 px-4 rounded-lg hover:bg-blue-600 transition-colors duration-200"
+            >
+                Generate HTML
+            </button>
+            <!-- <button type="submit"
+                 class="w-full bg-blue-500 text-white py-3 px-4 rounded-lg hover:bg-blue-600 transition-colors duration-200"
+            >
+                Show Code
+            </button> -->
+        </form>
+    </div>
+
+    <div
+        id="container"
+        class="html-container relative mt-8 bg-white border-2 border-dashed border-gray-300 "
+    >
+        <div class="rounded-lg p-8 text-center">
+            Your Generated HTML Here
+        </div>
+        <div id="loader" class="hidden loader w-10 h-10 border-4 border-blue-400 border-solid border-t-transparent rounded-full animate-spin mx-auto my-4"></div>
+    </div>
+    <div
+        id="code-container"
+        class="mt-8 bg-gray-100 border-2 border-dashed border-gray-300 p-4 flex flex-col justify-between">
+        <pre ><code id="html-code"> HTML Code Here</code></pre>
+
+        <button id="open-modal" class="mt-4 px-4 py-2 bg-green-500 hover:bg-green-700 text-white rounded self-end">Save</button>
+    </div>
+
+    <div id="fileModal" class="hidden fixed inset-0 flex items-center justify-center">
+        <div class="bg-white p-6 rounded-lg shadow-lg w-80">
+            <h3 class="text-lg font-semibold mb-3">Enter File Name</h3>
+            <input type="text" id="fileNameInput" class="w-full p-2 border rounded-md focus:ring focus:ring-blue-300" placeholder="example.html">
+            <div class="flex justify-end space-x-2 mt-4">
+                <button id="cancel-btn" class="px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-500" >Cancel</button>
+                <button id="save-btn" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700" >Save</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        function openModal() {
+            document.getElementById('fileModal').classList.remove('hidden');
+            document.getElementById('overlay').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('fileModal').classList.add('hidden');
+            document.getElementById('overlay').classList.add('hidden');
+        }
+        async function save_file() {
+            const file_name = document.getElementById('fileNameInput').value
+            const content = code_block.textContent
+            const blob = new Blob([content], { type: 'text/plain' });
+
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = file_name; // Default file name; users can change it in the dialog
+            document.body.appendChild(a);
+            a.click();
+
+            // Clean up
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            closeModal()
+        }
+
+        function extractHtmlBlock(inputString) {
+            const regex = /```html\s*([\s\S]*?)```/g;
+            let matches = [];
+            let match;
+
+            while ((match = regex.exec(inputString)) !== null) {
+                matches.push(match[1].trim());
+            }
+
+            if (matches.length === 0) {
+                return inputString
+            }
+            return matches;
+        }
+
+        const searchInput = document.getElementById('searchInput');
+        const code_block = document.getElementById('html-code');
+        const save_btn = document.getElementById('save-btn');
+        const close_btn = document.getElementById('cancel-btn');
+        const open_modal_btn = document.getElementById('open-modal');
+
+        open_modal_btn.addEventListener('click', openModal )
+        close_btn.addEventListener('click', closeModal)
+        save_btn.addEventListener('click', save_file)
+
+        // Handle submit button click
+        document.querySelector('button[type="submit"]').addEventListener('click', (e) => {
+            e.preventDefault();
+
+            const searchTerm = searchInput.value.trim();
+            if (!searchTerm) return;
+
+            const old_html = code_block.textContent
+
+            document.getElementById('loader').classList.remove('hidden');
+
+            fetch('/create_html', {
+                method: 'POST',
+                body: JSON.stringify({
+                    prompt: searchTerm,
+                    html:old_html
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                html = extractHtmlBlock(data.html)
+                container.innerHTML = html;
+                code_block.textContent = html
+
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                container.innerHTML = '<p class="text-red-500">Error generating HTML. Please try again.</p>';
+            })
+            .finally(() => {
+                document.getElementById('loader').classList.add('hidden');
+            })
+        });
+
+
+    </script>
+</body>
+</html>
