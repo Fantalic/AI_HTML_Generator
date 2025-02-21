@@ -1,6 +1,6 @@
-# Page Designer
+# AI HTML Generator
 
-Page Designer is a web tool that allows users to generate and edit HTML content based on text prompts. Users can type a prompt, submit it, and the tool will generate corresponding HTML code, which can be saved as an `.html` file. The HTML generation is powered by a local Ollama server, which is hosted using Python's `http.server` module. Additionally, users can modify the generated HTML by submitting follow-up prompts.
+AI HTML Generator is a web tool that allows users to generate and edit HTML content based on text prompts. Users can type a prompt, submit it, and the tool will generate corresponding HTML code, which can be saved as an `.html` file. The HTML generation is powered by a local Ollama server, which is hosted using Python's `http.server` module. Additionally, users can modify the generated HTML by submitting follow-up prompts.
 
 ## Features
 
@@ -28,3 +28,5 @@ You can try the tool by simply typing your prompt into the input field, then cli
 1. **Clone the repository** to your local machine.
    ```bash
    git clone https://github.com/your-username/page-designer.git
+   install.bat
+   run.bat
