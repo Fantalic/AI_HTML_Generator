@@ -4,8 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@2.8.2/dist/alpine.min.js" defer></script>
+    <style>
+        #container *:not(#container) {
+            cursor: pointer;
+            transition: background-color 0.3s, outline 0.3s;
+        }
+
+        #container *:not(#container):hover {
+            background-color: lightgray;
+            outline: 1px dashed gray;
+        }
+    </style>
 </head>
-<body class="bg-indigo-100">
+<body
+    class="bg-indigo-100"
+    x-data="{ htmlContent: ' HTML Code Here' }"
+>
     <div class="container mx-auto px-4 py-8 max-w-4xl  ">
         <h1 class="text-3xl font-bold mb-8 text-center">AI HTML Generator</h1>
 
@@ -24,11 +39,6 @@
             >
                 Generate HTML
             </button>
-            <!-- <button type="submit"
-                 class="w-full bg-blue-500 text-white py-3 px-4 rounded-lg hover:bg-blue-600 transition-colors duration-200"
-            >
-                Show Code
-            </button> -->
         </form>
     </div>
 
@@ -36,7 +46,7 @@
         class="html-container relative mt-8 bg-white border-2 border-dashed border-gray-300 "
     >
         <div id="loader" class="hidden loader w-10 h-10 border-4 border-blue-400 border-solid border-t-transparent rounded-full animate-spin mx-auto my-4"></div>
-        <div id="container">
+        <div id="container" x-html="htmlContent" >
             <div class="rounded-lg p-8 text-center">
                 Your Generated HTML Here
             </div>
@@ -45,7 +55,14 @@
     <div
         id="code-container"
         class="mt-8 bg-gray-100 border-2 border-dashed border-gray-300 p-4 flex flex-col justify-between">
-        <pre ><code id="html-code"> HTML Code Here</code></pre>
+        <pre >
+            <code
+                id="html-code"
+                x-text="htmlContent"
+                @click="editCode($event)"
+                @blur="htmlContent = $event.target.innerText"
+            ></code>
+        </pre>
 
         <button id="open-modal" class="mt-4 px-4 py-2 bg-green-500 hover:bg-green-700 text-white rounded self-end">Save</button>
     </div>
@@ -63,6 +80,13 @@
 
 
     <script>
+        function editCode(event) {
+            const codeElement = event.target;
+            // Toggle contenteditable when clicked
+            codeElement.contentEditable = codeElement.contentEditable === "true" ? "false" : "true";
+            codeElement.focus();
+        }
+
         function openModal() {
             document.getElementById('fileModal').classList.remove('hidden');
             document.getElementById('overlay').classList.remove('hidden');
@@ -116,14 +140,14 @@
         close_btn.addEventListener('click', closeModal)
         save_btn.addEventListener('click', save_file)
 
-        // Handle submit button click
-        document.querySelector('button[type="submit"]').addEventListener('click', (e) => {
+        function handleSubmit(e) {
             e.preventDefault();
 
             const searchTerm = searchInput.value.trim();
             if (!searchTerm) return;
 
-            const old_html = code_block.textContent
+            //const old_html = code_block.textContent
+            const old_html = document.body.__x.$data.htmlContent
 
             document.getElementById('loader').classList.remove('hidden');
             document.getElementById('container').classList.add('hidden');
@@ -146,21 +170,52 @@
             })
             .then(data => {
                 html = extractHtmlBlock(data.html)
-                container.innerHTML = html;
-                code_block.textContent = html
+                document.body.__x.$data.htmlContent = html;
+                //container.innerHTML = html;
+                //code_block.textContent = html
 
             })
             .catch(error => {
                 console.error('Error fetching data:', error);
-                container.innerHTML = '<p class="text-red-500">Error generating HTML. Please try again.</p>';
+                document.body.__x.$data.htmlContent = '<p class="text-red-500">Error generating HTML. Please try again.</p>';
             })
             .finally(() => {
                 document.getElementById('container').classList.remove('hidden');
                 document.getElementById('loader').classList.add('hidden');
             })
+        }
+
+        // Handle submit button click
+        document.querySelector('button[type="submit"]').addEventListener('click', handleSubmit);
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const container = document.getElementById("container");
+
+            container.addEventListener("click", function(event) {
+                let target = event.target;
+
+                // Ensure the clicked element is inside the container
+                if (target !== container) {
+                    target.setAttribute("contenteditable", "true");
+                    target.focus();
+
+                    target.addEventListener('blur', () => {
+                        document.body.__x.$data.htmlContent = document.getElementById('container').innerHTML;
+                    });
+                }
+            });
+
+            // Optional: Remove contenteditable when clicking outside
+            document.addEventListener("click", function(event) {
+                if (!container.contains(event.target)) {
+                    let editableElements = container.querySelectorAll("[contenteditable='true']");
+                    editableElements.forEach(el => el.removeAttribute("contenteditable"));
+                }
+            });
         });
 
 
     </script>
 </body>
 </html>
+
