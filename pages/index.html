@@ -33,13 +33,14 @@
     </div>
 
     <div
-        id="container"
         class="html-container relative mt-8 bg-white border-2 border-dashed border-gray-300 "
     >
-        <div class="rounded-lg p-8 text-center">
-            Your Generated HTML Here
-        </div>
         <div id="loader" class="hidden loader w-10 h-10 border-4 border-blue-400 border-solid border-t-transparent rounded-full animate-spin mx-auto my-4"></div>
+        <div id="container">
+            <div class="rounded-lg p-8 text-center">
+                Your Generated HTML Here
+            </div>
+        </div>
     </div>
     <div
         id="code-container"
@@ -125,6 +126,7 @@
             const old_html = code_block.textContent
 
             document.getElementById('loader').classList.remove('hidden');
+            document.getElementById('container').classList.add('hidden');
 
             fetch('/create_html', {
                 method: 'POST',
@@ -153,6 +155,7 @@
                 container.innerHTML = '<p class="text-red-500">Error generating HTML. Please try again.</p>';
             })
             .finally(() => {
+                document.getElementById('container').classList.remove('hidden');
                 document.getElementById('loader').classList.add('hidden');
             })
         });
