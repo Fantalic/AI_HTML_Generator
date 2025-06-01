@@ -78,7 +78,7 @@ class MyRequestHandler(http.server.BaseHTTPRequestHandler):
             self.wfile.write(page.encode('utf-8'))
 
 
-def run(server_class=http.server.HTTPServer, handler_class=MyRequestHandler, port=8000):
+def run(server_class=http.server.HTTPServer, handler_class=MyRequestHandler, port=8080):
     server_address = ('', port)
     httpd = server_class(server_address, handler_class)
     print(f'Serving on port {port}...')
