@@ -1,0 +1,49 @@
+[x-cloak] {
+  display: none !important;
+}
+
+#container *:not(#container) {
+  cursor: pointer;
+  transition: outline 0.2s, background-color 0.2s;
+}
+
+#container *:not(#container):hover {
+  outline: 2px dashed #818cf8;
+  outline-offset: 1px;
+  background-color: rgba(129, 140, 248, 0.06);
+}
+
+#container *:not(#container):focus {
+  outline: 2px solid #6366f1;
+  outline-offset: 1px;
+  background-color: rgba(99, 102, 241, 0.08);
+  border-radius: 2px;
+}
+
+#html-code {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+#html-code:focus {
+  background: rgba(69, 71, 90, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
