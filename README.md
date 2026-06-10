@@ -2,9 +2,9 @@
 
 > **aigen** = AI + HTML generation — a forge for markup.
 
-A portfolio project exploring AI-assisted web development. `aigen_html` is a small web server that uses a local [Ollama](https://ollama.ai) LLM to generate and edit HTML from natural language prompts — with JWT authentication, a live preview editor, and a separate frontend build pipeline.
+`aigen_html` is a small web server that uses a local [Ollama](https://ollama.ai) LLM to generate and edit HTML from natural language prompts — with JWT authentication, a live preview editor, and a separate frontend build pipeline.
 
-I started this project to get hands-on experience with a range of tools and patterns I hadn't worked with before: serving a local LLM via API, hand-rolling JWT auth (no third-party library), building a minimal UI toolchain with Vite + Alpine.js, and structuring a Python project professionally from the ground up.
+I started this project to get hands-on experience with a range of tools and patterns I hadn't worked with before: serving a local LLM via API, hand-rolling JWT auth (no third-party library), building a minimal UI toolchain with Vite + Alpine.js, and structuring a Python project from the ground up.
 
 ## Project Structure
 
@@ -127,14 +127,6 @@ make test       # Run tests
 make lint       # Lint with ruff
 make format     # Format with ruff
 ```
-
-## Troubleshooting
-
-| Symptom | Likely Cause | Fix |
-|---|---|---|
-| `ModuleNotFoundError: ollama_api` | Running old `server.py` instead of package | Use `python -m aigen_html` |
-| "users.json not found" | No `.env` file, using defaults | Harmless, copy `.env.example` to `.env` |
-| Token doesn't work | Default expiry is 5 minutes | Increase `JWT_EXPIRE_SECONDS` |
 
 ## Technologies
 
