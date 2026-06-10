@@ -4,10 +4,10 @@ from http.cookies import SimpleCookie
 from urllib.parse import urlparse
 from pathlib import Path
 
-from ai_creature_generator.services.ollama import ai_request
-from ai_creature_generator.services.jwt import create_jwt, verify_jwt
-from ai_creature_generator import utils
-from ai_creature_generator.config import JWT_SECRET, JWT_ALGORITHM, SERVER_PORT, USER_DATA_PATH, STATIC_DIR
+from aigen_html.services.ollama import ai_request
+from aigen_html.services.jwt import create_jwt, verify_jwt
+from aigen_html import utils
+from aigen_html.config import JWT_SECRET, JWT_ALGORITHM, SERVER_PORT, USER_DATA_PATH, STATIC_DIR
 
 user = { "name":"test", "password":"test", "id":0, "email":"test@test.de" }
 

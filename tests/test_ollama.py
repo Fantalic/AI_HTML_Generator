@@ -1,5 +1,5 @@
 import pytest
-from ai_creature_generator.services.ollama import ai_request
+from aigen_html.services.ollama import ai_request
 
 
 def test_requires_model():

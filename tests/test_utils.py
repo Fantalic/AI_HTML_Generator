@@ -1,4 +1,4 @@
-from ai_creature_generator.utils import extract_html_code, remove_think_tags, simple_parse_qs
+from aigen_html.utils import extract_html_code, remove_think_tags, simple_parse_qs
 
 
 class TestExtractHtmlCode:

@@ -1,14 +1,16 @@
-# AI Creature Generator
+# aigen_html
 
 An AI-powered HTML generator that uses local [Ollama](https://ollama.ai) models to create and edit HTML content from natural language prompts. Features JWT-based authentication and a live HTML preview editor.
+
+> **aigen** = AI + HTML generation — a forge for markup.
 
 ## Project Structure
 
 ```
-ai_creature_generator/
+aigen_html/
 ├── src/                          # Python package (src layout)
-│   └── ai_creature_generator/
-│       ├── __main__.py           # Entry point: python -m ai_creature_generator
+│   └── aigen_html/
+│       ├── __main__.py           # Entry point: python -m aigen_html
 │       ├── config.py             # Environment-based configuration
 │       ├── server.py             # HTTP server & request routing
 │       ├── exceptions.py         # Custom exceptions
@@ -49,7 +51,7 @@ pip install -r requirements.txt
 pip install -e .          # Install package in dev mode
 
 # Run the server
-python -m ai_creature_generator
+python -m aigen_html
 ```
 
 Or use the convenience scripts:

@@ -3,7 +3,7 @@ requires = ["setuptools>=64"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "ai_creature_generator"
+name = "aigen_html"
 version = "0.1.0"
 description = "AI-powered HTML generator using local Ollama models"
 readme = "README.md"
@@ -21,11 +21,11 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/your-username/ai_creature_generator"
+Homepage = "https://github.com/your-username/aigen_html"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["ai_creature_generator*"]
+include = ["aigen_html*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -1,4 +1,4 @@
-from ai_creature_generator.services.jwt import create_jwt, verify_jwt
+from aigen_html.services.jwt import create_jwt, verify_jwt
 
 SECRET = "test_secret"
 
