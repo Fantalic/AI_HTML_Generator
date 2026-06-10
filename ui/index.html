@@ -62,7 +62,7 @@
           <button @click="showModal = true" class="px-4 py-2 bg-green-500 hover:bg-green-700 text-white rounded">
             Save
           </button>
-          <div x-show="showModal" class="fixed inset-0 flex items-center justify-center bg-black/30">
+          <div x-show="showModal" x-cloak class="fixed inset-0 flex items-center justify-center bg-black/30">
             <div class="bg-white p-6 rounded-lg shadow-lg w-80" @click.outside="showModal = false">
               <h3 class="text-lg font-semibold mb-3">Enter File Name</h3>
               <input type="text" x-model="fileName" class="w-full p-2 border rounded-md focus:ring focus:ring-blue-300" placeholder="example.html">
