@@ -10,70 +10,150 @@
   <script type="module" src="/src/main.js"></script>
 </head>
 <body>
-  <div x-data="appState()" class="bg-indigo-100 min-h-screen">
-    <!-- Login Form -->
+  <div x-data="appState()" class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <!-- Login -->
     <div x-show="!$store.app.authenticated" class="flex min-h-screen flex-col justify-center px-6 py-12 lg:px-8">
       <div x-data="loginForm()" class="sm:mx-auto sm:w-full sm:max-w-sm">
         <template x-if="error">
           <p class="text-red-500 text-sm text-center mb-4" x-text="error"></p>
         </template>
-        <h2 class="mt-10 text-center text-2xl font-bold text-gray-900">Sign in to your account</h2>
-        <form @submit.prevent="handleLogin" class="mt-10 space-y-6">
+        <div class="text-center mb-8">
+          <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-indigo-600 mb-4">
+            <span class="text-2xl text-white font-bold">&lt;/&gt;</span>
+          </div>
+          <h2 class="text-2xl font-bold text-gray-900">AI HTML Generator</h2>
+          <p class="text-sm text-gray-500 mt-1">Sign in to continue</p>
+        </div>
+        <form @submit.prevent="handleLogin" class="space-y-5">
           <div>
-            <label for="email" class="block text-sm font-medium text-gray-900">Email address</label>
-            <div class="mt-2">
-              <input type="email" x-model="email" id="email" required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:outline-indigo-600 sm:text-sm">
-            </div>
+            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+            <input type="email" x-model="email" id="email" required
+              class="mt-1 block w-full rounded-lg bg-white px-4 py-2.5 text-sm text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all">
           </div>
           <div>
-            <label for="password" class="block text-sm font-medium text-gray-900">Password</label>
-            <div class="mt-2">
-              <input type="password" x-model="password" id="password" required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:outline-indigo-600 sm:text-sm">
-            </div>
+            <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+            <input type="password" x-model="password" id="password" required
+              class="mt-1 block w-full rounded-lg bg-white px-4 py-2.5 text-sm text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all">
           </div>
-          <button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+          <button type="submit"
+            class="w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all">
             Sign in
           </button>
         </form>
       </div>
     </div>
 
-    <!-- Editor -->
-    <div x-data="htmlEditor()" x-show="$store.app.authenticated" class="container mx-auto px-4 py-8 max-w-4xl">
-      <h1 class="text-3xl font-bold mb-8 text-center">AI HTML Generator</h1>
-
-      <form @submit.prevent="handleSubmit">
-        <div class="mb-8">
-          <input x-model="prompt" type="text" placeholder="Describe the HTML you want..." class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-blue-500">
+    <!-- Main App -->
+    <div x-show="$store.app.authenticated" class="flex flex-col min-h-screen">
+      <!-- Header -->
+      <header class="bg-white border-b border-gray-200 shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
+              <span class="text-xs text-white font-bold">&lt;/&gt;</span>
+            </div>
+            <span class="font-semibold text-gray-800">AI HTML Generator</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-xs text-gray-400 hidden sm:inline">Connected</span>
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          </div>
         </div>
-        <button type="submit" class="w-full bg-blue-500 text-white py-3 px-4 rounded-lg hover:bg-blue-600 transition-colors duration-200">
-          Generate HTML
-        </button>
-      </form>
+      </header>
 
-      <div class="html-container relative mt-8 bg-white border-2 border-dashed border-gray-300">
-        <div x-show="loading" class="loader w-10 h-10 border-4 border-blue-400 border-solid border-t-transparent rounded-full animate-spin mx-auto my-4"></div>
-        <div x-show="!loading" id="container" @click="editHTML" x-html="$store.app.htmlContent" class="p-4"></div>
-      </div>
+      <!-- Main Content -->
+      <main x-data="htmlEditor()" class="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-6 py-6 space-y-5">
+        <!-- Prompt Section -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+          <form @submit.prevent="handleSubmit">
+            <div class="flex gap-3">
+              <input x-model="prompt" type="text" placeholder="Describe the HTML you want to generate..."
+                class="flex-1 rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all placeholder:text-gray-400">
+              <button type="submit" :disabled="loading"
+                class="rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 whitespace-nowrap">
+                <span x-show="!loading">Generate</span>
+                <span x-show="loading" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                <span x-show="loading">Generating...</span>
+              </button>
+            </div>
+          </form>
+        </div>
 
-      <div class="mt-8 bg-gray-100 border-2 border-dashed border-gray-300 p-4 flex flex-col justify-between">
-        <pre><code id="html-code" x-text="$store.app.htmlContent" @click="editCode" @blur="$store.app.htmlContent = $event.target.innerText"></code></pre>
-        <div x-data="fileSaver()" class="mt-4 self-end">
-          <button @click="showModal = true" class="px-4 py-2 bg-green-500 hover:bg-green-700 text-white rounded">
-            Save
-          </button>
-          <div x-show="showModal" x-cloak class="fixed inset-0 flex items-center justify-center bg-black/30">
-            <div class="bg-white p-6 rounded-lg shadow-lg w-80" @click.outside="showModal = false">
-              <h3 class="text-lg font-semibold mb-3">Enter File Name</h3>
-              <input type="text" x-model="fileName" class="w-full p-2 border rounded-md focus:ring focus:ring-blue-300" placeholder="example.html">
-              <div class="flex justify-end space-x-2 mt-4">
-                <button @click="showModal = false" class="px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-500">Cancel</button>
-                <button @click="saveFile" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Save</button>
+        <!-- Preview & Code -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <!-- Toolbar -->
+          <div class="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-gray-50/50">
+            <div class="flex items-center gap-2">
+              <div class="w-3 h-3 rounded-full bg-rose-400"></div>
+              <div class="w-3 h-3 rounded-full bg-amber-400"></div>
+              <div class="w-3 h-3 rounded-full bg-emerald-400"></div>
+              <span class="text-xs text-gray-400 ml-2 font-medium">Preview</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button @click="showCode = !showCode"
+                class="text-xs px-3 py-1.5 rounded-md border border-gray-200 bg-white text-gray-600 hover:bg-gray-100 hover:text-gray-800 transition-all font-medium flex items-center gap-1.5">
+                <span x-text="showCode ? 'Hide' : 'Show'"></span>
+                <span>&lt;/&gt;</span>
+              </button>
+              <div x-data="fileSaver()">
+                <button @click="showModal = true"
+                  class="text-xs px-3 py-1.5 rounded-md bg-indigo-600 text-white hover:bg-indigo-500 transition-all font-medium">
+                  Save
+                </button>
+                <!-- Save Modal -->
+                <div x-show="showModal" x-cloak
+                  class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+                  @click.outside="showModal = false">
+                  <div class="bg-white rounded-xl shadow-xl w-80 p-6" @click.stop>
+                    <h3 class="text-base font-semibold text-gray-900 mb-1">Save File</h3>
+                    <p class="text-xs text-gray-500 mb-4">Enter a filename for your HTML file.</p>
+                    <input type="text" x-model="fileName"
+                      class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all"
+                      placeholder="index.html">
+                    <div class="flex justify-end gap-2 mt-5">
+                      <button @click="showModal = false"
+                        class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 font-medium transition-all">Cancel</button>
+                      <button @click="saveFile"
+                        class="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 font-medium transition-all">Save</button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
+
+          <!-- Preview Area -->
+          <div class="relative">
+            <div x-show="loading" class="flex items-center justify-center py-20">
+              <div class="w-8 h-8 border-3 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+            </div>
+            <div x-show="!loading" id="container" @click="editHTML"
+              x-html="$store.app.htmlContent"
+              class="p-6 min-h-[260px] cursor-pointer"></div>
+          </div>
+
+          <!-- Code Editor (Collapsible) -->
+          <div x-show="showCode" x-transition:enter.duration.200ms x-transition:leave.duration.200ms
+            class="border-t border-gray-200 bg-[#1e1e2e]">
+            <div class="flex items-center justify-between px-5 py-2 bg-[#181825] border-b border-[#313244]">
+              <span class="text-xs text-[#a6adc8] font-mono">index.html</span>
+              <span class="text-xs text-[#6c7086]">read-only · click to edit</span>
+            </div>
+            <div class="overflow-auto max-h-80">
+              <pre class="p-5 text-sm font-mono leading-relaxed"><code id="html-code"
+                @click="editCode"
+                @blur="$store.app.htmlContent = $event.target.innerText"
+                class="text-[#cdd6f4] outline-none block min-h-[80px]"
+                x-text="$store.app.htmlContent"></code></pre>
+            </div>
+          </div>
         </div>
-      </div>
+
+        <!-- Quick Tips -->
+        <div class="text-center text-xs text-gray-400 pt-1">
+          Click on any element in the preview to edit it directly
+        </div>
+      </main>
     </div>
   </div>
 </body>

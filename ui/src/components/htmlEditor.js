@@ -4,6 +4,7 @@ export function htmlEditor() {
   return {
     prompt: "",
     loading: false,
+    showCode: false,
 
     init() {
       document.addEventListener("click", (event) => {
