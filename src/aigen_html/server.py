@@ -89,6 +89,8 @@ class MyRequestHandler(http.server.BaseHTTPRequestHandler):
             self.wfile.write(b'Unauthorized: Token missing or invalid\n')
             return False
 
+        return True
+
     def do_POST(self):
         print("POST")
 
@@ -166,6 +168,7 @@ class MyRequestHandler(http.server.BaseHTTPRequestHandler):
             self.end_headers()
 
             self.wfile.write(page.encode('utf-8'))
+            return
 
         if not self.do_Auth():
             return
@@ -179,6 +182,7 @@ class MyRequestHandler(http.server.BaseHTTPRequestHandler):
             self.end_headers()
 
             self.wfile.write(page.encode('utf-8'))
+            return
 
 
 def run(server_class=http.server.HTTPServer, handler_class=MyRequestHandler, port=SERVER_PORT):

@@ -3,7 +3,8 @@ export function fileSaver() {
     showModal: false,
     fileName: "index.html",
 
-    saveFile(content) {
+    saveFile() {
+      const content = this.$store.app.htmlContent;
       if (!content) return;
 
       const blob = new Blob([content], { type: "text/html" });

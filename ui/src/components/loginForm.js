@@ -13,7 +13,7 @@ export function loginForm() {
         const response = await login(this.email, this.password);
 
         if (response.status === 302) {
-          window.location.href = "/";
+          this.$store.app.authenticated = true;
         } else {
           this.error = "Invalid credentials";
         }

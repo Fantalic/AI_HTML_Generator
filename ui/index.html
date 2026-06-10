@@ -6,9 +6,75 @@
   <title>AI HTML Generator</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/src/styles/main.css" />
   <script type="module" src="/src/main.js"></script>
 </head>
 <body>
-  <div id="app"></div>
+  <div class="bg-indigo-100 min-h-screen">
+    <!-- Login Form -->
+    <div x-show="!$store.app.authenticated" class="flex min-h-screen flex-col justify-center px-6 py-12 lg:px-8">
+      <div x-data="loginForm()" class="sm:mx-auto sm:w-full sm:max-w-sm">
+        <template x-if="error">
+          <p class="text-red-500 text-sm text-center mb-4" x-text="error"></p>
+        </template>
+        <h2 class="mt-10 text-center text-2xl font-bold text-gray-900">Sign in to your account</h2>
+        <form @submit.prevent="handleLogin" class="mt-10 space-y-6">
+          <div>
+            <label for="email" class="block text-sm font-medium text-gray-900">Email address</label>
+            <div class="mt-2">
+              <input type="email" x-model="email" id="email" required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:outline-indigo-600 sm:text-sm">
+            </div>
+          </div>
+          <div>
+            <label for="password" class="block text-sm font-medium text-gray-900">Password</label>
+            <div class="mt-2">
+              <input type="password" x-model="password" id="password" required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:outline-indigo-600 sm:text-sm">
+            </div>
+          </div>
+          <button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+            Sign in
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Editor -->
+    <div x-data="htmlEditor()" x-show="$store.app.authenticated" class="container mx-auto px-4 py-8 max-w-4xl">
+      <h1 class="text-3xl font-bold mb-8 text-center">AI HTML Generator</h1>
+
+      <form @submit.prevent="handleSubmit">
+        <div class="mb-8">
+          <input x-model="prompt" type="text" placeholder="Describe the HTML you want..." class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-blue-500">
+        </div>
+        <button type="submit" class="w-full bg-blue-500 text-white py-3 px-4 rounded-lg hover:bg-blue-600 transition-colors duration-200">
+          Generate HTML
+        </button>
+      </form>
+
+      <div class="html-container relative mt-8 bg-white border-2 border-dashed border-gray-300">
+        <div x-show="loading" class="loader w-10 h-10 border-4 border-blue-400 border-solid border-t-transparent rounded-full animate-spin mx-auto my-4"></div>
+        <div x-show="!loading" id="container" @click="editHTML" x-html="$store.app.htmlContent" class="p-4"></div>
+      </div>
+
+      <div class="mt-8 bg-gray-100 border-2 border-dashed border-gray-300 p-4 flex flex-col justify-between">
+        <pre><code id="html-code" x-text="$store.app.htmlContent" @click="editCode" @blur="$store.app.htmlContent = $event.target.innerText"></code></pre>
+        <div x-data="fileSaver()" class="mt-4 self-end">
+          <button @click="showModal = true" class="px-4 py-2 bg-green-500 hover:bg-green-700 text-white rounded">
+            Save
+          </button>
+          <div x-show="showModal" class="fixed inset-0 flex items-center justify-center bg-black/30">
+            <div class="bg-white p-6 rounded-lg shadow-lg w-80" @click.outside="showModal = false">
+              <h3 class="text-lg font-semibold mb-3">Enter File Name</h3>
+              <input type="text" x-model="fileName" class="w-full p-2 border rounded-md focus:ring focus:ring-blue-300" placeholder="example.html">
+              <div class="flex justify-end space-x-2 mt-4">
+                <button @click="showModal = false" class="px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-500">Cancel</button>
+                <button @click="saveFile" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Save</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

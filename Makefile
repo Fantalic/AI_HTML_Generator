@@ -5,7 +5,7 @@ install:
 	pip install -r requirements-dev.txt
 
 run:
-	python -m ai_creature_generator
+	python -m aigen_html
 
 test:
 	pytest -v

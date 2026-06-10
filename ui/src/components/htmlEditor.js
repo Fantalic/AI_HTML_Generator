@@ -3,8 +3,6 @@ import { generateHtml } from "../services/api.js";
 export function htmlEditor() {
   return {
     prompt: "",
-    htmlContent:
-      '<div class="rounded-lg p-8 text-center">Your Generated HTML Here</div>',
     loading: false,
 
     init() {
@@ -20,15 +18,15 @@ export function htmlEditor() {
     async handleSubmit() {
       if (!this.prompt) return;
 
-      const oldHtml = this.htmlContent;
+      const oldHtml = this.$store.app.htmlContent;
       this.loading = true;
 
       try {
         const html = await generateHtml(this.prompt, oldHtml);
-        this.htmlContent = html;
+        this.$store.app.htmlContent = html;
       } catch (error) {
         console.error("Error generating HTML:", error);
-        this.htmlContent =
+        this.$store.app.htmlContent =
           '<p class="text-red-500">Error generating HTML. Please try again.</p>';
       } finally {
         this.loading = false;
@@ -46,7 +44,7 @@ export function htmlEditor() {
         target.addEventListener(
           "blur",
           () => {
-            this.htmlContent = document.getElementById("container").innerHTML;
+            this.$store.app.htmlContent = document.getElementById("container").innerHTML;
           },
           { once: true }
         );
