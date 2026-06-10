@@ -4,7 +4,7 @@
 
 `aigen_html` is a small web server that uses a local [Ollama](https://ollama.ai) LLM to generate and edit HTML from natural language prompts — with JWT authentication, a live preview editor, and a separate frontend build pipeline.
 
-I started this project to get hands-on experience with a range of tools and patterns I hadn't worked with before: serving a local LLM via API, hand-rolling JWT auth (no third-party library), building a minimal UI toolchain with Vite + Alpine.js, and structuring a Python project from the ground up.
+Goal is to serve a local LLM via API, with hand-rolled JWT auth (no third-party library), building a minimal UI toolchain with Vite + Alpine.js, and structuring a Python project professionally from the ground up.
 
 ## Project Structure
 
