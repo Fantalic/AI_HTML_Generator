@@ -1,2 +1,2 @@
 call .venv\Scripts\activate
-python server.py
+python -m ai_creature_generator

@@ -1,0 +1,9 @@
+#container *:not(#container) {
+  cursor: pointer;
+  transition: background-color 0.3s, outline 0.3s;
+}
+
+#container *:not(#container):hover {
+  background-color: lightgray;
+  outline: 1px dashed gray;
+}
