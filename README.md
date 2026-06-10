@@ -9,7 +9,6 @@ I started this project to get hands-on experience with a range of tools and patt
 ## Project Structure
 
 ```
-aigen_html/
 ├── src/aigen_html/             # Python package (backend)
 │   ├── __init__.py
 │   ├── __main__.py             # Entry: python -m aigen_html
@@ -23,11 +22,7 @@ aigen_html/
 │   │   ├── __init__.py
 │   │   ├── html.py             # HTML extraction & think-tag removal
 │   │   └── parsers.py          # Query string parser
-│   └── static/
-│       └── pages/              # Legacy server-rendered HTML pages
-│           ├── index.html      # Main editor (Alpine.js 2 via CDN)
-│           └── login.html      # Login form
-├── ui/                         # Modern Vite + Alpine.js 3 SPA
+├── ui/                         # Vite + Alpine.js 3 SPA (single frontend)
 │   ├── package.json
 │   ├── vite.config.js          # Dev server :3000, proxies API to :8080
 │   ├── index.html              # SPA entry point
@@ -46,39 +41,22 @@ aigen_html/
 │   └── users.json              # User credentials (test@test.de / test)
 ├── pyproject.toml              # Python packaging & tool config
 ├── Makefile                    # Dev tasks
-├── server.py                   # [DEPRECATED] Old root server, moved to src/
 ├── requirements.txt
 └── requirements-dev.txt
 ```
 
-## Architecture — Two Frontends
+## Architecture — SPA Frontend
 
-After a major refactor the project has **two separate frontends** that share the same backend API:
-
-### Mode 1: Legacy Backend-Rendered (port 8080)
+The frontend is a single-page application built with Vite + Alpine.js 3.
 
 ```
-Browser → :8080 → Python http.server → serves static/pages/*.html directly
+Browser → :8080 → Python backend serves ui/dist/ (built SPA)
+Browser → :3000 → Vite dev server proxies /login, /create_html to :8080
 ```
 
-- User visits `http://localhost:8080/`
-- Backend checks auth → if no cookie, redirects to `/login`
-- User logs in → gets JWT cookie → redirected to `/`
-- Backend serves `static/pages/index.html` with **Alpine.js 2 CDN**
-- All HTML is server-rendered, Alpine adds reactivity on top
-
-**Console log `INIT ALPINE !`** lives in this mode (static/index.html).
-
-### Mode 2: Vite SPA (port 3000 + proxy to :8080)
-
-```
-Browser → :3000 → Vite dev server → /login, /create_html proxied to :8080
-```
-
-- User runs Vite dev server on port 3000
-- Vite serves `ui/index.html` with **Alpine.js 3 (npm package)**
-- API calls (`/login`, `/create_html`) are proxied to the backend
-- The frontend is a pure SPA: login form, HTML editor, file save
+- **Production mode**: Backend on port 8080 serves the built SPA from `ui/dist/`
+- **Development mode**: Vite dev server on port 3000 with hot reload, proxying API calls to the backend
+- The SPA handles login and the HTML editor entirely on the client side
 
 ## Quick Start
 
@@ -99,22 +77,23 @@ python -m venv .venv
 pip install -r requirements.txt
 pip install -e .
 
-# Optional: Vite frontend dependencies
+# Build the frontend
 cd ui
 npm install
+npm run build
 cd ..
 ```
 
-### Run (choose one mode)
+### Run
 
-**Mode 1 — Backend only (port 8080):**
 ```bash
 .venv\Scripts\activate
 python -m aigen_html
 ```
 Then visit `http://localhost:8080/` and log in with `test@test.de` / `test`.
 
-**Mode 2 — Full stack with Vite dev server (port 3000):**
+For development with hot reload, run the Vite dev server alongside:
+
 ```bash
 # Terminal 1: Backend
 .venv\Scripts\activate
@@ -149,24 +128,19 @@ make lint       # Lint with ruff
 make format     # Format with ruff
 ```
 
-## Troubleshooting — Post-Refactor State
-
-This project was recently restructured from flat files to a `src/` package layout.
-If something doesn't work, check these known issues:
+## Troubleshooting
 
 | Symptom | Likely Cause | Fix |
 |---|---|---|
 | `ModuleNotFoundError: ollama_api` | Running old `server.py` instead of package | Use `python -m aigen_html` |
-| Blank page on port 3000 | Vite index.html has no Alpine template yet | See `ui/index.html` — needs `x-data` markup |
-| Redirect loop to /login | Missing `return` after serving pages (fixed) | Restart server |
 | "users.json not found" | No `.env` file, using defaults | Harmless, copy `.env.example` to `.env` |
 | Token doesn't work | Default expiry is 5 minutes | Increase `JWT_EXPIRE_SECONDS` |
 
 ## Technologies
 
 - **Python 3.10+** — `http.server`, hand-rolled JWT, Ollama API integration
-- **Alpine.js 2 & 3** — Legacy pages use v2 CDN, Vite SPA uses v3 npm package
-- **Tailwind CSS** — Utility-first styling (CDN in legacy, via Vite in SPA)
+- **Alpine.js 3** — Reactive frontend via npm package
+- **Tailwind CSS** — Utility-first styling via CDN
 - **Vite** — Frontend build tool with dev proxy
 - **Ollama** — Local LLM inference
 - **pytest / ruff / mypy** — Testing, linting, type checking

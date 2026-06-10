@@ -2,12 +2,11 @@ import json
 import http.server
 from http.cookies import SimpleCookie
 from urllib.parse import urlparse
-from pathlib import Path
 
 from aigen_html.services.ollama import ai_request
 from aigen_html.services.jwt import create_jwt, verify_jwt
 from aigen_html import utils
-from aigen_html.config import JWT_SECRET, JWT_ALGORITHM, SERVER_PORT, USER_DATA_PATH, STATIC_DIR, OLLAMA_DEFAULT_MODEL
+from aigen_html.config import JWT_SECRET, JWT_ALGORITHM, SERVER_PORT, USER_DATA_PATH, UI_DIST_DIR, OLLAMA_DEFAULT_MODEL
 
 user = { "name":"test", "password":"test", "id":0, "email":"test@test.de" }
 
@@ -171,35 +170,57 @@ class MyRequestHandler(http.server.BaseHTTPRequestHandler):
             self.end_headers()
             return
 
+    def _serve_spa(self):
+        index_path = UI_DIST_DIR / "index.html"
+        if not index_path.exists():
+            self.send_response(404)
+            self.end_headers()
+            self.wfile.write(b"Frontend not built. Run `cd ui && npm run build` first.")
+            return
+        with open(index_path, 'r', encoding='utf-8') as file:
+            page = file.read()
+        self.send_response(200)
+        self.send_header('Content-Type', 'text/html')
+        self.end_headers()
+        self.wfile.write(page.encode('utf-8'))
+
+    def _serve_static(self, parsed_path):
+        file_path = UI_DIST_DIR / parsed_path.lstrip("/")
+        if file_path.exists() and file_path.is_file():
+            content_type = {
+                ".html": "text/html",
+                ".js": "application/javascript",
+                ".css": "text/css",
+                ".png": "image/png",
+                ".jpg": "image/jpeg",
+                ".svg": "image/svg+xml",
+                ".ico": "image/x-icon",
+                ".json": "application/json",
+            }.get(file_path.suffix, "application/octet-stream")
+            with open(file_path, 'rb') as file:
+                data = file.read()
+            self.send_response(200)
+            self.send_header('Content-Type', content_type)
+            self.end_headers()
+            self.wfile.write(data)
+            return True
+        return False
+
     def do_GET(self):
         parsed_url = urlparse(self.path)
         parsed_path = parsed_url.path
 
-        if(parsed_path == "/login"):
-            print("login")
-            with open(STATIC_DIR / "pages" / "login.html", 'r', encoding='utf-8') as file:
-                page = file.read()
-
-            self.send_response(200)
-            self.send_header('Content-Type', 'text/html')
-            self.end_headers()
-
-            self.wfile.write(page.encode('utf-8'))
+        if parsed_path == "/login":
+            self._serve_spa()
             return
 
         if not self.do_Auth():
             return
 
-        if parsed_path == "/":
-            with open(STATIC_DIR / "pages" / "index.html", 'r', encoding='utf-8') as file:
-                page = file.read()
-
-            self.send_response(200)
-            self.send_header('Content-Type', 'text/html')
-            self.end_headers()
-
-            self.wfile.write(page.encode('utf-8'))
+        if self._serve_static(parsed_path):
             return
+
+        self._serve_spa()
 
 
 def run(server_class=http.server.HTTPServer, handler_class=MyRequestHandler, port=SERVER_PORT):
