@@ -118,7 +118,6 @@ class MyRequestHandler(http.server.BaseHTTPRequestHandler):
                 message = "Unauthorized: Invalid credentials"
                 self.send_header("Content-Type", "text/plain; charset=utf-8")
                 self.send_header("Content-Length", str(len(message.encode('utf-8'))))
-                self.send_header('Location', "/login")
                 self.end_headers()
                 self.wfile.write(message.encode('utf-8'))
                 return
@@ -126,13 +125,22 @@ class MyRequestHandler(http.server.BaseHTTPRequestHandler):
             print("Login erfolgreich!")
 
             token = create_jwt( user["id"], JWT_SECRET )
-            self.send_response(302)
-            self.send_header('Content-Type', 'text/html')
-            self.send_header('Authorization', f'Bearer {token}')
-            self.send_header('Set-Cookie', f'token={token}; HttpOnly; Path=/')
-            self.send_header('Location', "/")
-            self.end_headers()
-            self.wfile.write(b"Login erfolgreich. Token wurde im Header gesendet.")
+            wants_json = "application/json" in self.headers.get("Accept", "")
+            if wants_json:
+                body = json.dumps({"success": True, "token": token})
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Set-Cookie", f"token={token}; HttpOnly; Path=/")
+                self.end_headers()
+                self.wfile.write(body.encode("utf-8"))
+            else:
+                self.send_response(302)
+                self.send_header("Content-Type", "text/html")
+                self.send_header("Authorization", f"Bearer {token}")
+                self.send_header("Set-Cookie", f"token={token}; HttpOnly; Path=/")
+                self.send_header("Location", "/")
+                self.end_headers()
+                self.wfile.write(b"Login erfolgreich. Token wurde im Header gesendet.")
             return
 
         if not self.do_Auth():

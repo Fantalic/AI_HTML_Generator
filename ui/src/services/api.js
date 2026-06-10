@@ -17,12 +17,18 @@ export async function login(email, password) {
   const body = new URLSearchParams({ email, password });
   const response = await fetch("/login", {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    redirect: "manual",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Accept: "application/json",
+    },
     body,
   });
 
-  return response;
+  if (!response.ok) {
+    throw new Error("Invalid credentials");
+  }
+
+  return response.json();
 }
 
 function extractHtmlBlock(input) {

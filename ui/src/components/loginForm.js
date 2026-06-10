@@ -2,23 +2,18 @@ import { login } from "../services/api.js";
 
 export function loginForm() {
   return {
-    email: "",
-    password: "",
+    email: "test@test.de",
+    password: "test",
     error: "",
 
     async handleLogin() {
       this.error = "";
 
       try {
-        const response = await login(this.email, this.password);
-
-        if (response.status === 302) {
-          this.$store.app.authenticated = true;
-        } else {
-          this.error = "Invalid credentials";
-        }
+        await login(this.email, this.password);
+        this.$store.app.authenticated = true;
       } catch (err) {
-        this.error = "Login failed. Please try again.";
+        this.error = "Invalid credentials";
       }
     },
   };

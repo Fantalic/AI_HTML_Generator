@@ -8,5 +8,5 @@ OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 OLLAMA_DEFAULT_MODEL = os.getenv("OLLAMA_DEFAULT_MODEL", "deepseek-r1:8b")
 SERVER_PORT = int(os.getenv("SERVER_PORT", "8080"))
 
-USER_DATA_PATH = Path(__file__).resolve().parent.parent.parent.parent / "data" / "users.json"
+USER_DATA_PATH = Path(__file__).resolve().parent.parent.parent / "data" / "users.json"
 STATIC_DIR = Path(__file__).resolve().parent / "static"

@@ -10,7 +10,7 @@
   <script type="module" src="/src/main.js"></script>
 </head>
 <body>
-  <div class="bg-indigo-100 min-h-screen">
+  <div x-data="appState()" class="bg-indigo-100 min-h-screen">
     <!-- Login Form -->
     <div x-show="!$store.app.authenticated" class="flex min-h-screen flex-col justify-center px-6 py-12 lg:px-8">
       <div x-data="loginForm()" class="sm:mx-auto sm:w-full sm:max-w-sm">
