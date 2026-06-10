@@ -7,7 +7,7 @@ from pathlib import Path
 from aigen_html.services.ollama import ai_request
 from aigen_html.services.jwt import create_jwt, verify_jwt
 from aigen_html import utils
-from aigen_html.config import JWT_SECRET, JWT_ALGORITHM, SERVER_PORT, USER_DATA_PATH, STATIC_DIR
+from aigen_html.config import JWT_SECRET, JWT_ALGORITHM, SERVER_PORT, USER_DATA_PATH, STATIC_DIR, OLLAMA_DEFAULT_MODEL
 
 user = { "name":"test", "password":"test", "id":0, "email":"test@test.de" }
 
@@ -17,31 +17,33 @@ try:
 except:
     print("users.json not found")
 
-def ai_generate_html(prompt, old_html):
-    messages = [
-        {
-            "role": "system",
-            "content":
-                """
-                Generate a HTML page based on the user request or adapt the allready existing page.
-                Use modern css styling using tailwind classes.
-                !!! ONLY responde with HTML code !!!
-                """
-        },
-        {
-            "role": "system",
-            "content":
-                f"""
-                current HTML code: \n
-                {old_html}
-                """
-        },
-        {   "role": "user", "content": prompt   },
-    ]
+_chat_sessions = {}
 
-    response = ai_request(messages=messages, model="deepseek-r1:8b")
+SYSTEM_PROMPT = """
+Generate a HTML page based on the user request or adapt the allready existing page.
+Use modern css styling using tailwind classes.
+!!! ONLY responde with HTML code !!!
+"""
 
+def ai_generate_html(prompt, old_html, session_id=None):
+    if session_id and session_id in _chat_sessions:
+        history = _chat_sessions[session_id]
+        history[1] = {"role": "system", "content": f"current HTML code:\n{old_html}"}
+    else:
+        history = [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "system", "content": f"current HTML code:\n{old_html}"},
+        ]
+
+    history.append({"role": "user", "content": prompt})
+
+    response = ai_request(messages=history, model=OLLAMA_DEFAULT_MODEL)
     content = response["message"]["content"]
+
+    if session_id:
+        history.append({"role": "assistant", "content": content})
+        _chat_sessions[session_id] = history
+
     removed_thinking_part = utils.remove_think_tags(content)
     html = utils.extract_html_code(removed_thinking_part)
     if html == "" or html == None:
@@ -149,8 +151,15 @@ class MyRequestHandler(http.server.BaseHTTPRequestHandler):
         if self.path == '/create_html':
             data = json.loads(post_data.decode('utf-8'))
             prompt = data["prompt"]
-            old_html = data["html"]
-            html = ai_generate_html(prompt, old_html)
+            old_html = data.get("html", "")
+            cookie_header = self.headers.get('Cookie', '')
+            session_id = None
+            if cookie_header:
+                cookie = SimpleCookie()
+                cookie.load(cookie_header)
+                if 'token' in cookie:
+                    session_id = cookie['token'].value
+            html = ai_generate_html(prompt, old_html, session_id=session_id)
             obj_str = json.dumps({"html": html})
             self.send_response(200)
             self.send_header('Content-type', 'application/json')

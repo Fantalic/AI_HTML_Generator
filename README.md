@@ -126,12 +126,6 @@ npm run dev
 ```
 Then visit `http://localhost:3000/`.
 
-### Convenience scripts
-```bash
-install.bat    # Creates venv, installs dependencies
-run.bat        # Starts the backend
-```
-
 ## Configuration
 
 Copy `.env.example` to `.env` and adjust:

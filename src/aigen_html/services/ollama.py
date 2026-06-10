@@ -2,6 +2,33 @@ import requests
 import json
 from typing import Optional, List, Dict, Callable
 
+from aigen_html.config import OLLAMA_BASE_URL, OLLAMA_DEFAULT_MODEL
+
+
+def _call_ollama(endpoint: str, body: dict, timeout: int, stream: bool) -> requests.Response:
+    headers = {"Content-Type": "application/json"}
+    response = requests.post(
+        endpoint, json=body, headers=headers, timeout=timeout, stream=stream
+    )
+    response.raise_for_status()
+    return response
+
+
+def _format_messages_as_prompt(messages: List[Dict]) -> str:
+    parts = []
+    for msg in messages:
+        role = msg.get("role", "user")
+        content = msg.get("content", "")
+        if role == "system":
+            parts.append(f"System: {content}")
+        elif role == "user":
+            parts.append(f"User: {content}")
+        elif role == "assistant":
+            parts.append(f"Assistant: {content}")
+    parts.append("Assistant:")
+    return "\n\n".join(parts)
+
+
 def ai_request(
     type: str = "chat",
     model: str = None,
@@ -20,35 +47,6 @@ def ai_request(
     request_timeout: int = 30,
     on_stream: Optional[Callable[[Dict], None]] = None,
 ) -> Dict:
-    """
-    Send a request to Ollama API with support for both chat and generate endpoints
-
-    Args:
-        type: Request type - 'chat' or 'generate'
-        model: Model name to use (required)
-        messages: Chat history for chat requests
-        prompt: Input prompt for generate requests
-        context: Context from previous response (generate only)
-        options: Additional model options
-        temperature: Control randomness (0.0-1.0)
-        top_p: Diversity control via nucleus sampling
-        top_k: Diversity control via top-k sampling
-        repeat_penalty: Penalize repeated tokens
-        seed: Random seed
-        num_predict: Max tokens to generate
-        format: Response format (e.g., 'json')
-        stream: Enable streaming response
-        request_timeout: Request timeout in seconds
-        on_stream: Callback for streaming responses
-
-    Returns:
-        Dictionary with API response
-
-    Raises:
-        ValueError: For invalid parameters
-        RuntimeError: For API request failures
-    """
-    # Validate required parameters
     if not model:
         raise ValueError("Model is required")
     if type == "chat" and not messages:
@@ -56,18 +54,16 @@ def ai_request(
     if type == "generate" and not prompt:
         raise ValueError("Prompt is required for generate type")
 
-    # Merge options
     merged_options = options.copy() if options else {}
     for param in ['temperature', 'top_p', 'top_k',
-                 'repeat_penalty', 'seed', 'num_predict']:
+                  'repeat_penalty', 'seed', 'num_predict']:
         if locals()[param] is not None:
             merged_options[param] = locals()[param]
 
-    # Build request body
     body = {
         "model": model,
         "stream": stream,
-        "options": merged_options
+        "options": merged_options,
     }
 
     if format:
@@ -80,32 +76,36 @@ def ai_request(
         if context is not None:
             body["context"] = context
 
-    # Prepare request
-    endpoint = f"http://localhost:11434/api/{type}"
-    headers = {"Content-Type": "application/json"}
+    base = OLLAMA_BASE_URL.rstrip("/")
+    endpoint = f"{base}/api/{type}"
 
     try:
-        response = requests.post(
-            endpoint,
-            json=body,
-            headers=headers,
-            timeout=request_timeout,
-            stream=stream
-        )
-        response.raise_for_status()
+        response = _call_ollama(endpoint, body, request_timeout, stream)
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 404 and type == "chat":
+            prompt_text = _format_messages_as_prompt(messages)
+            fallback_body = {k: v for k, v in body.items() if k != "messages"}
+            fallback_body["prompt"] = prompt_text
+            fallback_endpoint = f"{base}/api/generate"
+            response = _call_ollama(fallback_endpoint, fallback_body, request_timeout, stream)
+        else:
+            raise RuntimeError(f"API request failed: {str(e)}") from e
 
-        if stream:
-            for line in response.iter_lines():
-                if line:
-                    try:
-                        data = json.loads(line.decode('utf-8'))
-                        if on_stream:
-                            on_stream(data)
-                    except json.JSONDecodeError:
-                        continue
-            return {"status": "stream completed"}
+    if stream:
+        for line in response.iter_lines():
+            if line:
+                try:
+                    data = json.loads(line.decode("utf-8"))
+                    if on_stream:
+                        on_stream(data)
+                except json.JSONDecodeError:
+                    continue
+        return {"status": "stream completed"}
 
-        return response.json()
+    data = response.json()
 
-    except requests.exceptions.RequestException as e:
-        raise RuntimeError(f"API request failed: {str(e)}") from e
+    if type == "chat":
+        return data
+    else:
+        content = data.get("response", "")
+        return {"message": {"content": content}}
